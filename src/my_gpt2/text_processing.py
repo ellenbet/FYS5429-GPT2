@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
 """
-Text to token
+Text to token and token ids to text 
+all functinos relevant below
 
 """
 
@@ -18,8 +19,11 @@ def token_ids_to_text(token_ids, tokenizer):
     flat = token_ids.squeeze(0) #remove batch dimension/make flat
     return tokenizer.decode(flat.tolist())
 
+
+
 """
 Text processing for instruction fine-tuning 
+all functions relevant below
 
 """
 

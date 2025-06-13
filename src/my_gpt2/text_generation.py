@@ -1,18 +1,24 @@
 import torch 
 
-
-"""
-generate(): 
-
-generates text with probabilistic sampling using temperature tuning and
-top k samling.
-
-"""
 def softmax_with_temperature(logits, temperature):
+    """ 
+    temperature scaling
+    if temp > 1 -> more uniform dist
+    elif temp < 1 -> more sharpened dist
+    elif temp == 1 -> no temp scaling
+    
+    """
     scaled_logits = logits/temperature # this is just temperature scaling - if temp > 1 -> more uniform dist, else sharper dist
     return torch.softmax(scaled_logits, dim = 0)
 
 def generate(model, idx, max_new_tokens, context_size, temperature = 0.0, top_k = None, eos_id = None):
+    """
+    generate(): 
+
+    generates text with probabilistic sampling using temperature tuning and
+    top k samling.
+
+    """
     for _ in range(max_new_tokens):
         idx_cond = idx[:, - context_size: ]
         with torch.no_grad():
@@ -43,13 +49,15 @@ def generate(model, idx, max_new_tokens, context_size, temperature = 0.0, top_k 
         idx = torch.cat((idx, idx_next), dim = 1)
     return idx
 
-"""
-generate_text_simple() 
-
-generates text based on the most probable token.
-"""
 
 def generate_text_simple(model, idx, max_new_tokens, context_size):
+    """
+    generate_text_simple() 
+
+    generates text based on the most probable token.
+
+    based on argmax(), rather than generate() multinomial
+    """
     for _ in range(max_new_tokens):
         idx_cond = idx[:, -context_size : ]
 
