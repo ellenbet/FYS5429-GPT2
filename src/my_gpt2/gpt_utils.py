@@ -83,7 +83,7 @@ def gradio_gpt2_assistant(input, gpt, num_sentences, device = "cpu", tokenizer =
     token_ids = generate(
         model = gpt, 
         idx = text_to_token_ids(input,  tokenizer).to(device),
-        max_new_tokens = max(100, num_sentences * 10), 
+        max_new_tokens = min(100, num_sentences * 10), 
         context_size = BASE_CONFIG["context_length"],
         top_k = 70,
         temperature = 1.5
