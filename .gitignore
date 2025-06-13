@@ -18,7 +18,6 @@
 *.pdf
 *.gradio
 
-
 # ignore venv 
 gpt2-venv
 

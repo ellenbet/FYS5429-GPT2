@@ -44,6 +44,13 @@ model_configs = {
 }
 
 def load_gpt2_assistant_with_weights(model_dir = "gpt2_params/fine-tuned_1206_gpt2-medium355M-sft.pth", CHOOSE_MODEL = "gpt2-medium (355M)", gpt = None):
+    """
+    Use: 
+
+    my_model = load_gpt2_assistant_with_weights()
+    -> loads in pretrained and instruction fine-tuned gpt2 medium
+    
+    """
     # choose and set up our model
     BASE_CONFIG.update(model_configs[CHOOSE_MODEL])
     if gpt is None:
@@ -53,6 +60,11 @@ def load_gpt2_assistant_with_weights(model_dir = "gpt2_params/fine-tuned_1206_gp
     
 
 def gpt2_assistant(input, gpt, device = "cpu", tokenizer = None):
+    """
+    Generates 150 tokens of text based on input, or the first 3 sentences.
+    In case of end-of-text, only tokens before this are shown.
+    
+    """
     if tokenizer is None: 
         tokenizer = tiktoken.get_encoding("gpt2")
     token_ids = generate(
@@ -80,6 +92,11 @@ def gpt2_assistant(input, gpt, device = "cpu", tokenizer = None):
         print(ans)
 
 def gradio_gpt2_assistant(input, gpt, num_sentences, device = "cpu", tokenizer = tokenizer):
+    """
+    GPT2 pretrained and fine-tuned for instructions is the assumed gpt-input
+    To be used in gradio
+    
+    """
     token_ids = generate(
         model = gpt, 
         idx = text_to_token_ids(input,  tokenizer).to(device),
@@ -141,6 +158,27 @@ def calc_loss_loader(data_loader, model, device, num_batches = None):
 
 def train_model_simple(model, train_loader, val_loader, optimizer, device,
                        num_epochs, eval_freq, eval_iter, start_context, tokenizer):
+    
+
+    """
+    This is the main training function for the gpt2. 
+
+    train_loader and val_loader are assumed either pretraining or fine-tuning
+    PyTorch dataloaders
+
+    optimizer is assumed PyTorch or made to match methods in PyTorch optimizers
+
+    device: either mps, cpu or cuda as str
+
+    num_epochs: few better than many to prevet overtraining, i did 2
+
+    ..
+    
+    """
+
+
+
+
     train_losses, val_losses, track_tokens_seen = [], [], []
     tokens_seen = 0
     global_step = -1

@@ -1,6 +1,15 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
+"""
+
+All plotting-relevant functions are here
+
+set_plt_params() -> original author: Janita Ovidie
+plot_eval() -> tweaked plot_loss() from Raschka
+
+"""
 
 def set_plt_params(remove_grid=False):
     """Set parameters and use seaborn theme to plot."""
