@@ -43,14 +43,12 @@ model_configs = {
     "gpt2-xl (1558M)": {"emb_dim": 1600, "n_layers": 48, "n_heads": 25},
 }
 
-def load_gpt2_assistant_with_weights(model_dir = "gpt2_params/fine-tuned_1206_gpt2-medium355M-sft.pth", CHOOSE_MODEL = "gpt2-medium (355M)", gpt = None, tokenizer = None):
+def load_gpt2_assistant_with_weights(model_dir = "gpt2_params/fine-tuned_1206_gpt2-medium355M-sft.pth", CHOOSE_MODEL = "gpt2-medium (355M)", gpt = None):
     # choose and set up our model
     BASE_CONFIG.update(model_configs[CHOOSE_MODEL])
     if gpt is None:
         gpt = GPTModel(BASE_CONFIG)
-        gpt.load_state_dict(torch.load(model_dir))
-    if tokenizer is None: 
-        tokenizer = tiktoken.get_encoding("gpt2")
+    gpt.load_state_dict(torch.load(model_dir))
     return gpt
     
 
