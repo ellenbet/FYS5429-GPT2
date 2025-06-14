@@ -102,11 +102,17 @@ def gradio_gpt2_assistant(input, gpt, num_sentences, device = "cpu", tokenizer =
         idx = text_to_token_ids(input,  tokenizer).to(device),
         max_new_tokens = min(100, num_sentences * 10), 
         context_size = BASE_CONFIG["context_length"],
-        top_k = 70,
-        temperature = 1.5
+        top_k = 20,
+        temperature = 0.9
     )
     ans = token_ids_to_text(token_ids, tokenizer)
-        # include only first three sentences
+
+    ans = ( ans[len(input):]
+    .replace("### Response:", "")
+    .strip())
+    ans = ans.replace("###Response:", "")
+    
+    # include only first three sentences
     target = {'.', '!', '?'}
     count = 0
     for i, char in enumerate(input):
@@ -300,3 +306,5 @@ def print_gradients(model, x):
         if 'weight' in name:
             #mean abs grad 
             print(name, "has gradient mean of", param.grad.abs().mean().item())
+
+

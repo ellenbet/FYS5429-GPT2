@@ -38,6 +38,7 @@ def format_input(entry):
 
     return instruction_text + input_text
 
+
 def custom_collate_fn(batch, pad_token_id=50256, ignore_index=-100, allowed_max_length=None, device = "cpu"):
     # Find the longest sequence in the batch
     batch_max_length = max(len(item)+1 for item in batch)

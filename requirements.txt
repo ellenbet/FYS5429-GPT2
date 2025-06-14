@@ -23,4 +23,8 @@ ipykernel == 6.29.5
 # LLM interface: 
 gradio == 5.33.2
 
+# Cross-platform lib for process and system monitoring in Python
+psutil == 7.0.0
+
+
 

@@ -1,25 +1,32 @@
 # Python packages
 import torch
+import csv
 import json
 import time
 from functools import partial
 import re
-import numpy as np
 
 # my GPT2 packages
-from my_gpt2.gpt_utils import load_gpt2_assistant_with_weights, tokenizer, BASE_CONFIG, train_model_simple
-from my_gpt2.text_processing import custom_collate_fn, format_input, text_to_token_ids, token_ids_to_text
+from my_gpt2.gpt_utils import load_gpt2_assistant_with_weights, tokenizer, train_model_simple, BASE_CONFIG
+from my_gpt2.text_processing import custom_collate_fn, format_input, token_ids_to_text, text_to_token_ids
 from my_gpt2.text_generation import generate
-from my_gpt2.plotting import set_plt_params, plot_eval
 from my_gpt2.Datasets import InstructionDataset, DataLoader
 
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
+"""
+Due to unimpressive function of fine-tuned medium llm on 1100 data entries, 
+I increased finetuning to 52 000 entries
+
+"""
 
 # setting some plotting params up
-set_plt_params()
+#set_plt_params()
 CHOOSE_MODEL = "gpt2-medium (355M)"
 
 
-device = torch.device("cuda") #torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"\on device: {device}")
 # loading in model
 model = load_gpt2_assistant_with_weights()
@@ -28,15 +35,15 @@ model.to(device)
 customized_collate_fn = partial(
     custom_collate_fn,
     device = device,
-    allowed_max_length=1024
+    allowed_max_length = 512
 )
 
-file_path = "training_data/instruction-data.json"
+file_path = "training_data/alpaca_data.json"
 with open(file_path, "r", encoding="utf-8") as file:
         data = json.load(file)
 
 num_workers = 0
-batch_size = 8
+batch_size = 2
 torch.manual_seed(123)
 
 train_portion = int(len(data) * 0.85)  # 85% for training
@@ -96,20 +103,8 @@ for name, param in model.named_parameters():
 
 start_time = time.time()
 torch.manual_seed(123)
-optimizer = torch.optim.AdamW(model.parameters(), lr=0.00005, weight_decay=0.1)
 
-num_epochs = 2
-
-train_losses, val_losses, tokens_seen = train_model_simple(
-    model, train_loader, val_loader, optimizer, device,
-    num_epochs = num_epochs, eval_freq=5, eval_iter=5,
-    start_context = format_input(val_data[0]), tokenizer=tokenizer
-)
-
-
-# on to some actual finetuning training!! 
-
-optimizer = torch.optim.AdamW(model.parameters(), lr=0.00005, weight_decay=0.1)
+optimizer = torch.optim.AdamW(model.parameters(), lr = 0.00005, weight_decay = 0.1)
 
 num_epochs = 2
 
@@ -125,15 +120,54 @@ print(f"Training completed in {execution_time_minutes:.2f} minutes.")
 
 # visualizing loss: 
 
-train_losses = np.array(train_losses)
+"""train_losses = np.array(train_losses)
 val_losses = np.array(val_losses)
 
 epochs_tensor = torch.linspace(0, num_epochs, len(train_losses))
 plot_eval(epochs_tensor, tokens_seen, train_losses, val_losses, train_label = "Train loss", val_label = "Validation loss", y_label = "Loss", save_as = "fine-tuning_loss.pdf")
 plot_eval(epochs_tensor, tokens_seen, np.exp(train_losses), np.exp(val_losses), train_label = "Train perplexity", val_label = "Validation perplexity", y_label = "Perplexity", save_as = "fine-tuning_perplexity.pdf")
-
+"""
 # consider https://www.gradio.app/
 
-file_name = f"finished_fine-tuned_1306_{re.sub(r'[ ()]', '', CHOOSE_MODEL) }-sft.pth"
+file_name = f"gpt2_params/alpaca_fine-tuned_1306_{re.sub(r'[ ()]', '', CHOOSE_MODEL) }-sft.pth"
 torch.save(model.state_dict(), file_name)
 print(f"Model saved as {file_name}")
+
+torch.manual_seed(123)
+
+
+for entry in test_data[:3]:
+
+    input_text = format_input(entry)
+
+    token_ids = generate(
+        model=model,
+        idx=text_to_token_ids(input_text, tokenizer).to(device),
+        max_new_tokens=256,
+        context_size=BASE_CONFIG["context_length"],
+        eos_id=50256
+    )
+    generated_text = token_ids_to_text(token_ids, tokenizer)
+    response_text = (
+        generated_text[len(input_text):]
+        .replace("### Response:", "")
+        .strip()
+)
+
+    print(input_text)
+    print(f"\nCorrect response:\n>> {entry['output']}")
+    print(f"\nModel response:\n>> {response_text.strip()}")
+    print("-------------------------------------")
+
+
+rows = zip(train_losses, val_losses, tokens_seen, num_epochs)
+
+# Write to CSV
+with open('52k_training_output.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    
+    # Optional: write header
+    writer.writerow(['train_losses', 'val_losses', 'tokens_seen', 'num_epochs'])
+    
+    # Write data rows
+    writer.writerows(rows)
