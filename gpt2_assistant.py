@@ -24,7 +24,7 @@ else:
     # Download from Hugging Face dataset repo
     file_path = hf_hub_download(
         repo_id="ellenbet/gpt2-alpaca-finetuned",
-        filename= " alpaca_fine-tuned_1306_gpt2-medium355M-sft.pth",
+        filename= "alpaca_fine-tuned_1306_gpt2-medium355M-sft.pth",
         repo_type = "dataset" #this is actually model weights and not a dataset...
     )
 
