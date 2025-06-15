@@ -26,5 +26,8 @@ gradio == 5.33.2
 # Cross-platform lib for process and system monitoring in Python
 psutil == 7.0.0
 
+# Retrieve weights: 
+huggingface-hub == 0.33.0
+
 
 

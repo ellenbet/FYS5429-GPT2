@@ -43,7 +43,7 @@ model_configs = {
     "gpt2-xl (1558M)": {"emb_dim": 1600, "n_layers": 48, "n_heads": 25},
 }
 
-def load_gpt2_assistant_with_weights(model_dir = "gpt2_params/fine-tuned_1206_gpt2-medium355M-sft.pth", CHOOSE_MODEL = "gpt2-medium (355M)", gpt = None):
+def load_gpt2_assistant_with_weights(device, model_dir = "gpt2_params/fine-tuned_1206_gpt2-medium355M-sft.pth", CHOOSE_MODEL = "gpt2-medium (355M)", gpt = None):
     """
     Use: 
 
@@ -55,43 +55,50 @@ def load_gpt2_assistant_with_weights(model_dir = "gpt2_params/fine-tuned_1206_gp
     BASE_CONFIG.update(model_configs[CHOOSE_MODEL])
     if gpt is None:
         gpt = GPTModel(BASE_CONFIG)
-    gpt.load_state_dict(torch.load(model_dir))
+    state_dict = torch.load(model_dir, map_location=device)
+    gpt.load_state_dict(state_dict)
     return gpt
     
 
 def gpt2_assistant(input, gpt, device = "cpu", tokenizer = None):
     """
-    Generates 150 tokens of text based on input, or the first 3 sentences.
+    Generates 150 tokens of text based on input, or the first 4 sentences.
     In case of end-of-text, only tokens before this are shown.
     
     """
-    if tokenizer is None: 
-        tokenizer = tiktoken.get_encoding("gpt2")
     token_ids = generate(
         model = gpt, 
         idx = text_to_token_ids(input,  tokenizer).to(device),
         max_new_tokens = 150, 
         context_size = BASE_CONFIG["context_length"],
-        top_k = 70,
-        temperature = 1.5
+        top_k = 30,
+        temperature = 0.9
     )
     ans = token_ids_to_text(token_ids, tokenizer)
-    
-    # include only first three sentences
+
+    ans = ( ans[len(input):]
+    .replace("### Response:", "")
+    .strip())
+    ans = ans.replace("###Response:", "")
+    ans = ans.replace("###Instructon:", "")
+    ans = ans.replace("### Instructon:", "")
+
+    # include only first num_sentences sentences
     target = {'.', '!', '?'}
     count = 0
     for i, char in enumerate(input):
         if char in target:
             count += 1
-            if count == 3:
+            if count == 4:
                 ans = input[:i+1]
 
+    # if end of text in output, return until end of text
     if "<|endoftext|>" in ans:
-        print("output:\n", ans[: ans.index("<|endoftext|>")])
+        print(ans[: ans.index("<|endoftext|>")])
     else:
         print(ans)
 
-def gradio_gpt2_assistant(input, gpt, num_sentences, device = "cpu", tokenizer = tokenizer):
+def gradio_gpt2_assistant(input, gpt, max_num_sentences, device = "cpu", tokenizer = tokenizer):
     """
     GPT2 pretrained and fine-tuned for instructions is the assumed gpt-input
     To be used in gradio
@@ -100,7 +107,7 @@ def gradio_gpt2_assistant(input, gpt, num_sentences, device = "cpu", tokenizer =
     token_ids = generate(
         model = gpt, 
         idx = text_to_token_ids(input,  tokenizer).to(device),
-        max_new_tokens = min(100, num_sentences * 10), 
+        max_new_tokens = min(150, max_num_sentences * 10), 
         context_size = BASE_CONFIG["context_length"],
         top_k = 20,
         temperature = 0.9
@@ -111,14 +118,16 @@ def gradio_gpt2_assistant(input, gpt, num_sentences, device = "cpu", tokenizer =
     .replace("### Response:", "")
     .strip())
     ans = ans.replace("###Response:", "")
+    ans = ans.replace("###Instructon:", "")
+    ans = ans.replace("### Instructon:", "")
     
-    # include only first three sentences
+    # include only first num_sentences sentences
     target = {'.', '!', '?'}
     count = 0
     for i, char in enumerate(input):
         if char in target:
             count += 1
-            if count == num_sentences:
+            if count == max_num_sentences:
                 ans = input[:i+1]
 
     if "<|endoftext|>" in ans:
@@ -181,9 +190,6 @@ def train_model_simple(model, train_loader, val_loader, optimizer, device,
     ..
     
     """
-
-
-
 
     train_losses, val_losses, track_tokens_seen = [], [], []
     tokens_seen = 0
