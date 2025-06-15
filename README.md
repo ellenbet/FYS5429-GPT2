@@ -1,5 +1,5 @@
 # LLM
-FYS5429 Project - Build an LLM from scratched, based on 'free coding path'.
+FYS5429 Project - Build an LLM from scratch, based on 'free coding path'.
 
 Large language models (LLMs) are gradually becoming more integrated in everyday life, for students and employees alike. They can be used to increase productivity and facilitate the learning of new concepts, and is rapidly being integrated into professional tools. Workplaces and universities now host courses on "How to become an AI expert", a course essentially meant to teach the average person how to use a large language model to progress in their tasks. As we become increasingly dependent on LLMs, it is important to understand their very basics. How are they made, how can we train them and how do they generate the text that we put so much faith in? To answer these questions, I have built a Generative Pretrained Transformer, a GPT, using the recipie from Rascka's "How to build an LLM from scratch". I tested two different sizes of the GPT2 architecture, and found that while pretraining for proof of function was only neccessary on the small version - the weights retrieved from OpenAI's GPT2 model demonstrated that the medium version outperformed the small. I then fine-tuned the medium GPT2 using data supplied from the same author, and used my fine-tuned LLM as a personal assistant.
 
