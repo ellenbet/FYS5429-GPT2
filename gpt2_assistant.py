@@ -45,4 +45,4 @@ while chatting:
         chatting = False
     else: 
         print(("\n I'm thinking... \n"))
-        gpt2_assistant(prompt, gpt)
+        gpt2_assistant("###Instruction: " + prompt, gpt)
