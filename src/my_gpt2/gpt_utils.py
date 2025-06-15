@@ -71,8 +71,8 @@ def gpt2_assistant(input, gpt, device = "cpu", tokenizer = tokenizer):
         idx = text_to_token_ids(input,  tokenizer).to(device),
         max_new_tokens = 50, 
         context_size = BASE_CONFIG["context_length"],
-        top_k = 50,
-        temperature = 1.5
+        top_k = 20,
+        temperature = 0.9
     )
     ans = token_ids_to_text(token_ids, tokenizer)
 
@@ -93,7 +93,7 @@ def gpt2_assistant(input, gpt, device = "cpu", tokenizer = tokenizer):
     for i, char in enumerate(input):
         if char in target:
             count += 1
-            if count == 2:
+            if count == 2+1:
                 ans = input[:i+1]
                 break
 
@@ -114,8 +114,8 @@ def gradio_gpt2_assistant(input, gpt, max_num_sentences, device = "cpu", tokeniz
         idx = text_to_token_ids(input,  tokenizer).to(device),
         max_new_tokens = min(150, max_num_sentences * 10), 
         context_size = BASE_CONFIG["context_length"],
-        top_k = 50,
-        temperature = 1.5
+        top_k = 20,
+        temperature = 0.9
     )
     ans = token_ids_to_text(token_ids, tokenizer)
 
@@ -134,7 +134,7 @@ def gradio_gpt2_assistant(input, gpt, max_num_sentences, device = "cpu", tokeniz
     for i, char in enumerate(input):
         if char in target:
             count += 1
-            if count == max_num_sentences:
+            if count == max_num_sentences + 1:
                 ans = input[:i+1]
                 break
 
