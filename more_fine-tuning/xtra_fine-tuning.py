@@ -19,6 +19,8 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 Due to unimpressive function of fine-tuned medium llm on 1100 data entries, 
 I increased finetuning to 52 000 entries
 
+This was also unimpressive...
+
 """
 
 # setting some plotting params up
