@@ -50,7 +50,7 @@ else:
 
 def assist(input, return_sentences, model = gpt):
     input = "###Instruction:" + input
-    return gradio_gpt2_assistant(input, gpt = model, num_sentences = return_sentences)
+    return gradio_gpt2_assistant(input, gpt = model, max_num_sentences = return_sentences)
 
 demo = gr.Interface(
     fn = assist,
