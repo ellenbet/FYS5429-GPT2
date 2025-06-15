@@ -1,8 +1,9 @@
-import re
+
 import torch
-import seaborn as sns
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
+import tiktoken
+
+tokenizer = tiktoken.get_encoding("gpt2")
+
 
 """
 Text to token and token ids to text 
@@ -10,12 +11,12 @@ all functinos relevant below
 
 """
 
-def text_to_token_ids(text, tokenizer):
+def text_to_token_ids(text, tokenizer = tokenizer):
     encoded = tokenizer.encode(text, allowed_special={'<|endoftext|>'})
     encoded_tensor = torch.tensor(encoded).unsqueeze(0) #batch dimension/matrix created
     return encoded_tensor
 
-def token_ids_to_text(token_ids, tokenizer):
+def token_ids_to_text(token_ids, tokenizer = tokenizer):
     flat = token_ids.squeeze(0) #remove batch dimension/make flat
     return tokenizer.decode(flat.tolist())
 

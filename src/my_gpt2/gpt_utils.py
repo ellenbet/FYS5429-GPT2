@@ -60,28 +60,32 @@ def load_gpt2_assistant_with_weights(device, model_dir = "gpt2_params/fine-tuned
     return gpt
     
 
-def gpt2_assistant(input, gpt, device = "cpu", tokenizer = None):
+def gpt2_assistant(input, gpt, device = "cpu", tokenizer = tokenizer):
     """
-    Generates 150 tokens of text based on input, or the first 4 sentences.
+    Generates 50 tokens of text based on input, or the first 2 sentences.
     In case of end-of-text, only tokens before this are shown.
     
     """
     token_ids = generate(
         model = gpt, 
         idx = text_to_token_ids(input,  tokenizer).to(device),
-        max_new_tokens = 150, 
+        max_new_tokens = 50, 
         context_size = BASE_CONFIG["context_length"],
-        top_k = 30,
-        temperature = 0.9
+        top_k = 50,
+        temperature = 1.5
     )
     ans = token_ids_to_text(token_ids, tokenizer)
 
-    ans = ( ans[len(input):]
+    ans = (ans[len(input):]
     .replace("### Response:", "")
     .strip())
+
     ans = ans.replace("###Response:", "")
-    ans = ans.replace("###Instructon:", "")
-    ans = ans.replace("### Instructon:", "")
+    ans = ans.replace("###Instruction:", "")  
+    ans = ans.replace("### Instruction:", "")  
+    ans = ans.replace("### Input:", "")
+    ans = ans.replace("\n", " ")
+
 
     # include only first num_sentences sentences
     target = {'.', '!', '?'}
@@ -89,8 +93,9 @@ def gpt2_assistant(input, gpt, device = "cpu", tokenizer = None):
     for i, char in enumerate(input):
         if char in target:
             count += 1
-            if count == 4:
+            if count == 2:
                 ans = input[:i+1]
+                break
 
     # if end of text in output, return until end of text
     if "<|endoftext|>" in ans:
@@ -109,8 +114,8 @@ def gradio_gpt2_assistant(input, gpt, max_num_sentences, device = "cpu", tokeniz
         idx = text_to_token_ids(input,  tokenizer).to(device),
         max_new_tokens = min(150, max_num_sentences * 10), 
         context_size = BASE_CONFIG["context_length"],
-        top_k = 20,
-        temperature = 0.9
+        top_k = 50,
+        temperature = 1.5
     )
     ans = token_ids_to_text(token_ids, tokenizer)
 
@@ -118,8 +123,10 @@ def gradio_gpt2_assistant(input, gpt, max_num_sentences, device = "cpu", tokeniz
     .replace("### Response:", "")
     .strip())
     ans = ans.replace("###Response:", "")
-    ans = ans.replace("###Instructon:", "")
-    ans = ans.replace("### Instructon:", "")
+    ans = ans.replace("###Instruction:", "")  
+    ans = ans.replace("### Instruction:", "")  
+    ans = ans.replace("### Input:", "")
+    ans = ans.replace("\n", " ")
     
     # include only first num_sentences sentences
     target = {'.', '!', '?'}
@@ -129,6 +136,7 @@ def gradio_gpt2_assistant(input, gpt, max_num_sentences, device = "cpu", tokeniz
             count += 1
             if count == max_num_sentences:
                 ans = input[:i+1]
+                break
 
     if "<|endoftext|>" in ans:
         return ans[: ans.index("<|endoftext|>")]
