@@ -23,6 +23,16 @@ Then enter the venv using
 source gpt2-venv/bin/activate
 ```
 
+Finally, install the requirements using
+```sh
+pip install -r requirements.txt
+```
+
+Optionally in UV with
+```sh
+uv pip install -r requirements.txt
+```
+
 ## Installation
 To install this project using pip, run the following command while inside appropriate venv:
 ```sh
