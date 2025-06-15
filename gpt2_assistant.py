@@ -24,7 +24,7 @@ else:
     downloaded_path = hf_hub_download(
         repo_id="ellenbet/gpt2-raschka-finetuning",
         filename="fine-tuned_1206_gpt2-medium355M-sft.pth",
-        repo_type="dataset"
+        repo_type="model"
     )
     
     print(f"Downloaded file to temporary path: {downloaded_path}")
