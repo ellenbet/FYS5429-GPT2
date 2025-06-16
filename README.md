@@ -24,6 +24,8 @@ PS - if downloading 1,7GB params is not an option to test the model, send a mess
 
 ## Make a viritual enviroment
 
+PS - the ```requirements.txt``` for this repository need a Python version between 3.11 - 3.12. Python 3.13 will not work!
+
 Using python module venv or uv venv: 
 
 Python module venv:
